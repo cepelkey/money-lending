@@ -2,21 +2,26 @@
 
 require 'vendor/autoload.php';
 
-$app = new App(true);
+$app = new App();
 
-$app->auth = $app->add(new \atk4\login\Auth([
-    'hasPreferences' => true, // do not show Preferences page/form
-    'pageDashboard' => 'dashboard', // name of the page, where user arrives after login
-    'pageExit' => 'index', // where to send user after logout
-]));
-$app->auth->setModel(new Model\User($app->db));
-
-// check that the user is logged-in
 if (!$app->auth->user->loaded()) {
-    $app->add([new \atk4\login\LoginForm(), 'auth'=>$app->auth]);
+    $app->redirect(['login']);
   }
+$msg = $app->add(['Message', 'Welcome to the user page for the money lending app', 'info']);
+$msg->add('Text')->set($app->auth->user['name']);
 
-//display Friends, Loans and Repayments for logged in user
-$app->add('CRUD')->setModel(new Model\Friend($app->db));
-$app->add('CRUD')->setModel(new Model\Loan($app->db));
-$app->add('CRUD')->setModel(new Model\Repayment($app->db));
+
+$friends = $app->add(['Lister', 'defaultTemplate'=>'./friends-cards.html']);
+$friends->setModel($app->auth->user->ref('Friends'));
+
+/*
+//$model = new Model\Friend($app->db);
+//$model->addCondition('users_id', $app->auth->user->id);
+
+$table = $app->add('Table');
+$table->setModel($app->auth->user->ref('Friends'));
+$table->addDecorator('first_name', ['Link', ['loans'], ['friend_id'=>'id']]);
+$table->addDecorator('last_name', ['Link', ['loans'], ['friend_id'=>'id']]);
+*/
+
+$app->add(['Button', 'Logout'])->link(['logout']);

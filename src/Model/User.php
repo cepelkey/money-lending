@@ -12,7 +12,7 @@ class User extends \atk4\data\Model {
             ['name', 'required'=>true],
             ['email', 'required'=>true],
             ['password', 'required'=>true],
-            ['is_confirmed', 'type'=>'boolean'],
+            ['is_confirmed', 'type'=>'boolean', 'system'=>true],
             ['is_admin', 'type'=>'boolean'],
         ]);
         

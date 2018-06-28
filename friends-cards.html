@@ -1,0 +1,22 @@
+<div class="ui cards">
+    {rows}
+	{row}
+    <div class="card">
+        <div class="content">
+            <div class="header">{first_name}Elliot{/} {last_name}Fu{/} ({$owed})</div>
+            <div class="meta">{$total_loan} loaned, {$total_repaid} repaid</div>
+            <div class="description">
+                {email}Elliot Fu is a film-maker from New York.{/}
+            </div>
+        </div>
+        {button}
+        <a href="loans.php?friend_id={$id}" class="ui bottom attached button">
+            <i class="money bill alternate icon"></i> Loans
+        </a>
+        {/}
+    </div>
+    {/row}
+	{/rows}
+	{$Content}
+</div>
+<div class="ui hidden divider"></div>
