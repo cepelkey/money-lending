@@ -7,11 +7,29 @@ $app = new App();
 if (!$app->auth->user->loaded()) {
     $app->redirect(['login']);
   }
-$msg = $app->add(['Message', 'Welcome to the user page for the money lending app', 'info']);
-$msg->add('Text')->set($app->auth->user['name']);
 
+if (isset($_GET['message'])) {
+  $msg = $app->add(['Message', $_GET['message'], 'red']);
+  $msg->add(['View','Dismiss'])->link([]);
+};
+
+$newFriendButton = $app->add(['Button', 'Add New Friend', 'big primary']);
+$modal = $app->add('Modal');
+$newFriendButton->on('click', $modal->show());
 
 $friends = $app->add(['Lister', 'defaultTemplate'=>'./friends-cards.html']);
+
+$form = $modal->add('Form');
+$form->setModel($app->auth->user->ref('Friends'));
+$form->onSubmit(function($form) use ($modal, $friends) {
+  $form->model->save();
+  return [
+    $form->jsReload(),
+    $friends->jsReload(),
+    $modal->hide()
+  ];
+});
+
 $friends->setModel($app->auth->user->ref('Friends'));
 
 /*

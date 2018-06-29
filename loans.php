@@ -18,15 +18,30 @@ $friend = $app->auth->user->ref('Friends')->load($friend_id);
 $c1 = $col->addColumn(4);
 $friendsTemplate = $c1->add(['defaultTemplate'=>'./friends-cards.html']);
 $friendsTemplate->template->set($friend);
+$friendsTemplate->template->del('multi');
 $friendsTemplate->template->del('button');
 
-$c2 = $col->addColumn(6);
-$c2->add(['Header', 'Loans']);
-$c2->add('Table')->setModel($friend->ref("Loans"));
+$buttons = $c1->add(['ui'=>'fluid buttons']);
+$buttons->add(['Button', null, 'primary basic', 'icon'=>'left arrow'])->link(['dashboard']);
+$delButton = $buttons->add(['Button', null, 'negative basic', 'icon'=>'trash']);
 
-$c3 = $col->addColumn(6);
-$c3->add(['Header', 'Payments']);
-$c3->add('Table')->setModel($friend->ref("Repayments"));
+$delButton->on('click', function() use ($friend, $app){
+  $name = $friend['first_name'].' '.$friend['last_name'];
+  $friend->delete();
+  return $app->jsRedirect(['dashboard', 'message'=>'Your friend ' . $name . ' was deleted']);
+});
 
-$c1->add(['Button', 'My Dashboard', 'primary fluid'])->link(['dashboard']);
-// $c1->add(['Button', 'Logout', 'primary'])->link(['logout']);
+function addCol($col, $friend, $label, $action, $default=50){
+  $c = $col->addColumn(6);
+  $c->add(['Header', $label]);
+  $t = $c->add('Table')->setModel($friend->ref($label));
+
+  $field = $c->add(['FormField\Money', $default, 'fluid']);
+  $fieldAction = $field->addAction([$action, 'primary']);
+  $fieldAction->on('click', function($js, $amount) use ($friend, $label) {
+    $friend->ref($label)->save(['date'=>date("Y-m-d"),'amount'=>$amount]);
+    return $friend->app->jsRedirect([]);
+  }, [$field->jsInput()->val()]);
+}
+addCol($col, $friend, 'Loans', 'Loan');
+addCol($col, $friend, 'Repayments', 'Repay', $friend['owed']);
